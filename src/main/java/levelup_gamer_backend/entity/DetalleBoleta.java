@@ -2,11 +2,7 @@ package levelup_gamer_backend.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 @Entity
 @Table(name = "DETALLE_BOLETA")
@@ -24,10 +20,13 @@ public class DetalleBoleta {
     @JoinColumn(name = "boleta_id", nullable = false)
     @JsonIgnore
     @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Boleta boleta;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "producto_codigo", nullable = false)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Producto producto;
 
     @Column(name = "cantidad", nullable = false)

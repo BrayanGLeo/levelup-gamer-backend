@@ -74,24 +74,27 @@ public class BoletaServiceImpl implements BoletaService {
         int totalCalculado = 0;
 
         for (DetalleBoletaDto itemDto : request.getItems()) {
-            Producto productoActualizado = productoService.actualizarStock(
+            Producto producto = productoService.actualizarStock(
                     itemDto.getCodigoProducto(),
                     itemDto.getCantidad());
 
+            int precioReal = producto.getPrecio(); 
+
             DetalleBoleta detalle = DetalleBoleta.builder()
                     .boleta(boleta)
-                    .producto(productoActualizado)
+                    .producto(producto)
                     .cantidad(itemDto.getCantidad())
-                    .precioUnitario(itemDto.getPrecioUnitario())
+                    .precioUnitario(precioReal)
                     .build();
 
             boleta.getDetalles().add(detalle);
-            totalCalculado += itemDto.getCantidad() * itemDto.getPrecioUnitario();
+            totalCalculado += itemDto.getCantidad() * precioReal;
         }
 
         if (totalCalculado != request.getTotal()) {
             throw new RuntimeException(
-                    "Error de seguridad: El total calculado no coincide con el total enviado. Transacción revertida.");
+                    "Error de integridad: El total calculado (" + totalCalculado + 
+                    ") no coincide con el total enviado (" + request.getTotal() + ").");
         }
 
         return boletaRepository.save(boleta);
@@ -115,8 +118,7 @@ public class BoletaServiceImpl implements BoletaService {
         Boleta boleta = boletaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Boleta no encontrada."));
 
-        List<String> estadosValidos = List.of("Pendiente", "Procesando", "En preparación", "En tránsito", "Completado",
-                "Cancelado");
+        List<String> estadosValidos = List.of("Pendiente", "Procesando", "En preparación", "En tránsito", "Completado", "Cancelado");
         if (!estadosValidos.contains(nuevoEstado)) {
             throw new IllegalArgumentException("Estado de orden no válido.");
         }
@@ -127,9 +129,10 @@ public class BoletaServiceImpl implements BoletaService {
     @Override
     @Transactional(readOnly = true)
     public Long obtenerTotalVentas() {
-        return boletaRepository.findAll().stream()
+        Long ventas = boletaRepository.findAll().stream()
                 .mapToLong(Boleta::getTotal)
                 .sum();
+        return ventas != null ? ventas : 0L;
     }
 
     @Override
