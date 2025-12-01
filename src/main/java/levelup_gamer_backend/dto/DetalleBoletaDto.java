@@ -6,5 +6,5 @@ import lombok.Data;
 public class DetalleBoletaDto {
     private String codigoProducto;
     private Integer cantidad;
-    private Integer precioUnitario; 
+    private Integer precioUnitario;
 }

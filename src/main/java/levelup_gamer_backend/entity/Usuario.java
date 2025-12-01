@@ -14,7 +14,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class Usuario {
 
-    // PK: ID autoincremental
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -32,9 +31,8 @@ public class Usuario {
     private String email;
 
     @Column(name = "password", nullable = false)
-    private String password; 
+    private String password;
 
-    // Rol: Almacena 'Administrador', 'Vendedor', 'Cliente'
     @Column(name = "rol", length = 20, nullable = false)
-    private String rol; 
+    private String rol;
 }

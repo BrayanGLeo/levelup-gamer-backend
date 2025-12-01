@@ -20,8 +20,9 @@ public class CategoriaServiceImpl implements CategoriaService {
     @Transactional
     public Categoria guardarCategoria(Categoria categoria) {
         Optional<Categoria> existingCat = categoriaRepository.findByNombre(categoria.getNombre());
-        if (existingCat.isPresent() && (categoria.getId() == null || !existingCat.get().getId().equals(categoria.getId()))) {
-             throw new RuntimeException("Ya existe una categoría con ese nombre: " + categoria.getNombre());
+        if (existingCat.isPresent()
+                && (categoria.getId() == null || !existingCat.get().getId().equals(categoria.getId()))) {
+            throw new RuntimeException("Ya existe una categoría con ese nombre: " + categoria.getNombre());
         }
         return categoriaRepository.save(categoria);
     }
@@ -31,7 +32,7 @@ public class CategoriaServiceImpl implements CategoriaService {
     public Optional<Categoria> obtenerPorId(Long id) {
         return categoriaRepository.findById(id);
     }
-    
+
     @Override
     @Transactional(readOnly = true)
     public List<Categoria> obtenerTodas() {

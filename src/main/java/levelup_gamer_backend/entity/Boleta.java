@@ -31,14 +31,12 @@ public class Boleta {
     private Integer total;
 
     @Column(name = "estado", length = 50, nullable = false)
-    private String estado; 
+    private String estado;
 
-    // FK a USUARIO (nullable=true permite compras de 'invitado')
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "usuario_id", nullable = true) 
+    @JoinColumn(name = "usuario_id", nullable = true)
     private Usuario usuario;
 
-    // Relación a DETALLE_BOLETA
     @OneToMany(mappedBy = "boleta", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DetalleBoleta> detalles;
 }

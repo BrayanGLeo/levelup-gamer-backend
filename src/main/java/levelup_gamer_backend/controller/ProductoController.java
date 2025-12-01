@@ -8,13 +8,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1") 
+@RequestMapping("/api/v1")
 public class ProductoController {
 
     @Autowired
     private ProductoService productoService;
-
-    // --- RUTAS PÚBLICAS (Catálogo) ---
 
     @GetMapping("/tienda/productos")
     public ResponseEntity<List<Producto>> obtenerTodos() {
@@ -27,9 +25,7 @@ public class ProductoController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-    
-    // --- RUTAS PROTEGIDAS (Admin / Vendedor: /api/v1/productos/**) ---
-    
+
     @PostMapping("/productos")
     public ResponseEntity<?> crearProducto(@RequestBody Producto producto) {
         try {
@@ -39,21 +35,21 @@ public class ProductoController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-    
+
     @PutMapping("/productos/{codigo}")
     public ResponseEntity<?> actualizarProducto(@PathVariable String codigo, @RequestBody Producto producto) {
         if (!productoService.obtenerPorCodigo(codigo).isPresent()) {
             return ResponseEntity.notFound().build();
         }
         try {
-            producto.setCodigo(codigo); 
+            producto.setCodigo(codigo);
             Producto productoActualizado = productoService.guardarProducto(producto);
             return ResponseEntity.ok(productoActualizado);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-    
+
     @DeleteMapping("/productos/{codigo}")
     public ResponseEntity<Void> eliminarProducto(@PathVariable String codigo) {
         if (!productoService.obtenerPorCodigo(codigo).isPresent()) {
@@ -62,10 +58,9 @@ public class ProductoController {
         productoService.eliminarPorCodigo(codigo);
         return ResponseEntity.noContent().build();
     }
-    
+
     @GetMapping("/admin/reportes/stock-critico")
     public ResponseEntity<List<Producto>> obtenerProductosBajoStock() {
-        // La ruta ya está protegida por SecurityConfig para Admin/Vendedor
         return ResponseEntity.ok(productoService.obtenerProductosBajoStock());
     }
 }

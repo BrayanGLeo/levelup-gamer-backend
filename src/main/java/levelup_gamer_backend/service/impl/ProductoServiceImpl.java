@@ -33,7 +33,7 @@ public class ProductoServiceImpl implements ProductoService {
     public List<Producto> obtenerTodos() {
         return productoRepository.findAll();
     }
-    
+
     @Override
     @Transactional
     public void eliminarPorCodigo(String codigo) {
@@ -46,25 +46,23 @@ public class ProductoServiceImpl implements ProductoService {
         return productoRepository.findByCategoriaNombre(nombreCategoria);
     }
 
-    // Reporte de Stock Crítico
     @Override
     @Transactional(readOnly = true)
     public List<Producto> obtenerProductosBajoStock() {
-        // Asumimos un stock crítico de 5 para este reporte
         return productoRepository.findAll().stream()
-            .filter(p -> p.getStock() <= p.getStockCritico())
-            .toList();
+                .filter(p -> p.getStock() <= p.getStockCritico())
+                .toList();
     }
 
-    // 🚨 Lógica Crítica: Actualización de Stock (Usada por BoletaService)
     @Override
     @Transactional
     public Producto actualizarStock(String codigo, int cantidadVendida) {
         Producto producto = productoRepository.findById(codigo)
-            .orElseThrow(() -> new RuntimeException("Producto no encontrado con código: " + codigo));
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado con código: " + codigo));
 
         if (producto.getStock() < cantidadVendida) {
-            throw new RuntimeException("Stock insuficiente. Solo hay " + producto.getStock() + " unidades de " + producto.getNombre() + ".");
+            throw new RuntimeException("Stock insuficiente. Solo hay " + producto.getStock() + " unidades de "
+                    + producto.getNombre() + ".");
         }
 
         producto.setStock(producto.getStock() - cantidadVendida);

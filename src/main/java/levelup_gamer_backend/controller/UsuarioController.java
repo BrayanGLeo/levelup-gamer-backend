@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/admin/usuarios") // Protegida solo para Administrador
+@RequestMapping("/api/v1/admin/usuarios")
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
@@ -22,18 +22,17 @@ public class UsuarioController {
     public ResponseEntity<List<Usuario>> obtenerTodos() {
         return ResponseEntity.ok(usuarioService.obtenerTodos());
     }
-    
+
     @GetMapping("/rut/{rut}")
     public ResponseEntity<Usuario> obtenerPorRut(@PathVariable String rut) {
         return usuarioService.obtenerPorRut(rut)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-    
+
     @PostMapping
     public ResponseEntity<?> crearUsuario(@RequestBody Usuario usuario) {
         try {
-            // El servicio maneja el cifrado de contraseña y la asignación de rol por defecto
             Usuario nuevoUsuario = usuarioService.registrarUsuario(usuario);
             return new ResponseEntity<>(nuevoUsuario, HttpStatus.CREATED);
         } catch (RuntimeException e) {
@@ -46,12 +45,12 @@ public class UsuarioController {
         if (!usuario.getRut().equals(rut)) {
             return ResponseEntity.badRequest().body("El RUT del cuerpo debe coincidir con el RUT de la URL.");
         }
-        
+
         Usuario usuarioExistente = usuarioService.obtenerPorRut(rut)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado para actualización."));
 
-        usuario.setId(usuarioExistente.getId()); // Asegurar que se actualiza el registro correcto
-        
+        usuario.setId(usuarioExistente.getId());
+
         try {
             Usuario usuarioActualizado = usuarioService.actualizarUsuario(usuario);
             return ResponseEntity.ok(usuarioActualizado);
@@ -63,7 +62,7 @@ public class UsuarioController {
     @DeleteMapping("/rut/{rut}")
     public ResponseEntity<Void> eliminarUsuario(@PathVariable String rut) {
         Usuario usuario = usuarioService.obtenerPorRut(rut).orElse(null);
-                
+
         if (usuario == null) {
             return ResponseEntity.notFound().build();
         }

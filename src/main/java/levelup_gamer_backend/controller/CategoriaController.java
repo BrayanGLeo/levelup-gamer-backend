@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/admin/categorias") // Protegida solo para Administrador
+@RequestMapping("/api/v1/admin/categorias")
 public class CategoriaController {
 
     @Autowired
@@ -34,7 +34,7 @@ public class CategoriaController {
     @PutMapping("/{id}")
     public ResponseEntity<?> actualizarCategoria(@PathVariable Long id, @RequestBody Categoria categoria) {
         if (categoria.getId() == null || !categoria.getId().equals(id)) {
-             return ResponseEntity.badRequest().body("El ID del cuerpo debe coincidir con el ID de la URL.");
+            return ResponseEntity.badRequest().body("El ID del cuerpo debe coincidir con el ID de la URL.");
         }
         if (!categoriaService.obtenerPorId(id).isPresent()) {
             return ResponseEntity.notFound().build();

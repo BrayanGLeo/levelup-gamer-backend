@@ -3,7 +3,7 @@ package levelup_gamer_backend.service.impl;
 import levelup_gamer_backend.entity.Usuario;
 import levelup_gamer_backend.repository.UsuarioRepository;
 import levelup_gamer_backend.service.UsuarioService;
-import org.springframework.security.crypto.password.PasswordEncoder; 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,25 +30,24 @@ public class UsuarioServiceImpl implements UsuarioService {
         if (usuarioRepository.existsByRut(usuario.getRut())) {
             throw new RuntimeException("El RUT ya está registrado.");
         }
-        
-        // Cifrar la contraseña antes de guardar
+
         usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
-        
+
         if (usuario.getRol() == null || usuario.getRol().isEmpty()) {
             usuario.setRol("Cliente");
         }
-        
+
         return usuarioRepository.save(usuario);
     }
-    
+
     @Override
     @Transactional
     public Usuario actualizarUsuario(Usuario usuario) {
         Usuario existingUser = usuarioRepository.findById(usuario.getId())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado para actualización."));
-        
-        // Si la contraseña fue modificada, codificarla.
-        if (usuario.getPassword() != null && !usuario.getPassword().isEmpty() && !passwordEncoder.matches(usuario.getPassword(), existingUser.getPassword())) {
+
+        if (usuario.getPassword() != null && !usuario.getPassword().isEmpty()
+                && !passwordEncoder.matches(usuario.getPassword(), existingUser.getPassword())) {
             usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
         } else {
             usuario.setPassword(existingUser.getPassword());
@@ -74,38 +73,37 @@ public class UsuarioServiceImpl implements UsuarioService {
     public Optional<Usuario> obtenerPorRut(String rut) {
         return usuarioRepository.findByRut(rut);
     }
-    
+
     @Override
     @Transactional
     public void eliminarPorId(Long id) {
         usuarioRepository.deleteById(id);
     }
-    
-    // Lógica para inicializar roles (Admin y Vendedor)
+
     @Override
     @Transactional
     public void inicializarAdminYVendedor() {
         if (usuarioRepository.findByEmail("admin@admin.cl").isEmpty()) {
             Usuario admin = Usuario.builder()
-                .nombre("Admin")
-                .apellido("LevelUp")
-                .rut("12345678-9")
-                .email("admin@admin.cl")
-                .password(passwordEncoder.encode("admin")) // Contraseña: admin
-                .rol("Administrador")
-                .build();
+                    .nombre("Admin")
+                    .apellido("LevelUp")
+                    .rut("12345678-9")
+                    .email("admin@admin.cl")
+                    .password(passwordEncoder.encode("admin"))
+                    .rol("Administrador")
+                    .build();
             usuarioRepository.save(admin);
         }
-        
+
         if (usuarioRepository.findByEmail("vendedor@vendedor.cl").isEmpty()) {
-             Usuario vendedor = Usuario.builder()
-                .nombre("Vendedor")
-                .apellido("LevelUp")
-                .rut("11111111-1")
-                .email("vendedor@vendedor.cl")
-                .password(passwordEncoder.encode("vendedor")) // Contraseña: vendedor
-                .rol("Vendedor")
-                .build();
+            Usuario vendedor = Usuario.builder()
+                    .nombre("Vendedor")
+                    .apellido("LevelUp")
+                    .rut("11111111-1")
+                    .email("vendedor@vendedor.cl")
+                    .password(passwordEncoder.encode("vendedor"))
+                    .rol("Vendedor")
+                    .build();
             usuarioRepository.save(vendedor);
         }
     }

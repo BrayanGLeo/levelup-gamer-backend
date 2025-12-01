@@ -18,12 +18,10 @@ public class DetalleBoleta {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // FK a BOLETA
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "boleta_id", nullable = false)
     private Boleta boleta;
 
-    // FK a PRODUCTO
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "producto_codigo", nullable = false)
     private Producto producto;

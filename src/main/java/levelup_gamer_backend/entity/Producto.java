@@ -14,15 +14,14 @@ import lombok.NoArgsConstructor;
 @Builder
 public class Producto {
 
-    // PK: El código del producto (String)
     @Id
-    @Column(name = "codigo", length = 20, nullable = false) 
+    @Column(name = "codigo", length = 20, nullable = false)
     private String codigo;
 
     @Column(name = "nombre", length = 100, nullable = false)
     private String nombre;
 
-    @Lob 
+    @Lob
     @Column(name = "descripcion")
     private String descripcion;
 
@@ -38,7 +37,6 @@ public class Producto {
     @Column(name = "imagen_url", length = 500)
     private String imagenUrl;
 
-    // FK a CATEGORIA
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "categoria_id", nullable = false)
     private Categoria categoria;
