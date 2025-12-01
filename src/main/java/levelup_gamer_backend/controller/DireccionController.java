@@ -2,7 +2,6 @@ package levelup_gamer_backend.controller;
 
 import levelup_gamer_backend.entity.Direccion;
 import levelup_gamer_backend.service.DireccionService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;

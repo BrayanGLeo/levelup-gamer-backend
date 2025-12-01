@@ -20,6 +20,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Service
+@SuppressWarnings("null")
 public class BoletaServiceImpl implements BoletaService {
 
     private final BoletaRepository boletaRepository;

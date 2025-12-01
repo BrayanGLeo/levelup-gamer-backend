@@ -26,22 +26,19 @@ public class ApplicationConfig {
         this.usuarioRepository = usuarioRepository;
     }
 
-    // 1. Carga los detalles del usuario desde la DB (por email)
     @Bean
     public UserDetailsService userDetailsService() {
         return email -> usuarioRepository.findByEmail(email)
                 .map(usuario -> {
-                    // Mapea el rol a una autoridad de Spring Security
-                    List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority(usuario.getRol()));
-                    
-                    // Retorna un objeto UserDetails
+                    List<GrantedAuthority> authorities = Collections
+                            .singletonList(new SimpleGrantedAuthority(usuario.getRol()));
                     return new User(usuario.getEmail(), usuario.getPassword(), authorities);
                 })
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con email: " + email));
     }
 
-    // 2. Proveedor de Autenticación
     @Bean
+    @SuppressWarnings("deprecation")
     public AuthenticationProvider authenticationProvider(PasswordEncoder passwordEncoder) {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
         authProvider.setUserDetailsService(userDetailsService());
@@ -49,7 +46,6 @@ public class ApplicationConfig {
         return authProvider;
     }
 
-    // 3. Administrador de Autenticación
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
