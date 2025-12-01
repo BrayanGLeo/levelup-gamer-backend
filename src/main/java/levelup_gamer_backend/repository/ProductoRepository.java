@@ -7,7 +7,8 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface ProductoRepository extends JpaRepository<Producto, String> { 
+public interface ProductoRepository extends JpaRepository<Producto, String> {
     List<Producto> findByCategoriaNombre(String nombreCategoria);
+
     List<Producto> findByStockLessThanEqual(Integer stockCritico);
 }
