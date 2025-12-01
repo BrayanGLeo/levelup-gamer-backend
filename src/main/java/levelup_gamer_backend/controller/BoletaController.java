@@ -11,30 +11,24 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1") 
+@RequestMapping("/api/v1")
 public class BoletaController {
 
     @Autowired
     private BoletaService boletaService;
 
-    // --- RUTA PÚBLICA (Checkout) ---
-
     @PostMapping("/checkout/finalizar")
     public ResponseEntity<?> realizarCompra(@RequestBody BoletaRequest request) {
         try {
             Boleta nuevaBoleta = boletaService.crearBoleta(request);
-            // Devuelve la ID y el número de orden para el éxito
-            String response = String.format("{\"id\": %d, \"numeroOrden\": %d}", 
-                                            nuevaBoleta.getId(), nuevaBoleta.getNumeroOrden());
+            String response = String.format("{\"id\": %d, \"numeroOrden\": %d}",
+                    nuevaBoleta.getId(), nuevaBoleta.getNumeroOrden());
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
         } catch (RuntimeException e) {
-            // Si falla el stock o la validación, la transacción se revierte
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al procesar la compra: " + e.getMessage());
         }
     }
-
-    // --- RUTAS PROTEGIDAS (Gestión Admin/Vendedor: /api/v1/ordenes/** y Reportes) ---
 
     @GetMapping("/ordenes")
     public ResponseEntity<List<Boleta>> obtenerTodas() {
@@ -61,9 +55,19 @@ public class BoletaController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
-    
+
     @GetMapping("/admin/reportes/total-ventas")
     public ResponseEntity<Long> obtenerTotalVentas() {
         return ResponseEntity.ok(boletaService.obtenerTotalVentas());
+    }
+
+    @GetMapping("/ordenes/mis-pedidos")
+    public ResponseEntity<List<Boleta>> obtenerMisPedidos(
+            org.springframework.security.core.Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        String email = authentication.getName();
+        return ResponseEntity.ok(boletaService.obtenerPorUsuario(email));
     }
 }

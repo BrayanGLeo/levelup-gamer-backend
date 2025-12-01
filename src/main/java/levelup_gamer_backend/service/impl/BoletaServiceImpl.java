@@ -25,7 +25,7 @@ public class BoletaServiceImpl implements BoletaService {
     private final BoletaRepository boletaRepository;
     private final ProductoService productoService;
     private final UsuarioService usuarioService;
-    
+
     private static final AtomicLong ORDER_COUNTER = new AtomicLong(1000L);
 
     public BoletaServiceImpl(
@@ -37,73 +37,69 @@ public class BoletaServiceImpl implements BoletaService {
         this.usuarioService = usuarioService;
     }
 
-    // 🚨 CRÍTICO: La transacción asegura la integridad entre stock y boleta
     @Override
-    @Transactional 
+    @Transactional
     public Boleta crearBoleta(BoletaRequest request) {
         Usuario usuario = null;
         if (request.getUsuarioEmail() != null && !request.getUsuarioEmail().isEmpty()) {
-            usuario = usuarioService.obtenerPorEmail(request.getUsuarioEmail()).orElse(null); 
+            usuario = usuarioService.obtenerPorEmail(request.getUsuarioEmail()).orElse(null);
         }
-        
+
         Boleta boleta = Boleta.builder()
                 .numeroOrden(ORDER_COUNTER.getAndIncrement())
                 .fechaCompra(LocalDateTime.now())
-                .total(request.getTotal()) 
-                .estado(request.getEstado() != null ? request.getEstado() : "Pendiente") 
+                .total(request.getTotal())
+                .estado(request.getEstado() != null ? request.getEstado() : "Pendiente")
                 .usuario(usuario)
                 .detalles(new ArrayList<>())
                 .build();
 
         int totalCalculado = 0;
-        
-        // 1. Procesar Detalles y Descontar Stock
+
         for (DetalleBoletaDto itemDto : request.getItems()) {
-            // Llama a ProductoService.actualizarStock, que lanza RuntimeException si el stock falla.
             Producto productoActualizado = productoService.actualizarStock(
-                itemDto.getCodigoProducto(), 
-                itemDto.getCantidad()
-            );
+                    itemDto.getCodigoProducto(),
+                    itemDto.getCantidad());
 
             DetalleBoleta detalle = DetalleBoleta.builder()
-                .boleta(boleta)
-                .producto(productoActualizado)
-                .cantidad(itemDto.getCantidad())
-                .precioUnitario(itemDto.getPrecioUnitario())
-                .build();
-            
+                    .boleta(boleta)
+                    .producto(productoActualizado)
+                    .cantidad(itemDto.getCantidad())
+                    .precioUnitario(itemDto.getPrecioUnitario())
+                    .build();
+
             boleta.getDetalles().add(detalle);
             totalCalculado += itemDto.getCantidad() * itemDto.getPrecioUnitario();
         }
-        
-        // 2. Lógica de Integridad: Verificar el total
+
         if (totalCalculado != request.getTotal()) {
-            throw new RuntimeException("Error de seguridad: El total calculado no coincide con el total enviado. Transacción revertida.");
+            throw new RuntimeException(
+                    "Error de seguridad: El total calculado no coincide con el total enviado. Transacción revertida.");
         }
 
-        // 3. Guardar Boleta
         return boletaRepository.save(boleta);
     }
-    
+
     @Override
     @Transactional(readOnly = true)
     public List<Boleta> obtenerTodas() {
         return boletaRepository.findAll();
     }
-    
+
     @Override
     @Transactional(readOnly = true)
     public Optional<Boleta> obtenerPorId(Long id) {
         return boletaRepository.findById(id);
     }
-    
+
     @Override
     @Transactional
     public Boleta actualizarEstado(Long id, String nuevoEstado) {
         Boleta boleta = boletaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Boleta no encontrada."));
-        
-        List<String> estadosValidos = List.of("Pendiente", "Procesando", "En preparación", "En tránsito", "Completado", "Cancelado");
+
+        List<String> estadosValidos = List.of("Pendiente", "Procesando", "En preparación", "En tránsito", "Completado",
+                "Cancelado");
         if (!estadosValidos.contains(nuevoEstado)) {
             throw new IllegalArgumentException("Estado de orden no válido.");
         }
@@ -111,12 +107,17 @@ public class BoletaServiceImpl implements BoletaService {
         return boletaRepository.save(boleta);
     }
 
-    // Reporte de Ventas
     @Override
     @Transactional(readOnly = true)
     public Long obtenerTotalVentas() {
         return boletaRepository.findAll().stream()
                 .mapToLong(Boleta::getTotal)
                 .sum();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Boleta> obtenerPorUsuario(String email) {
+        return boletaRepository.findByUsuarioEmailOrderByFechaCompraDesc(email);
     }
 }
