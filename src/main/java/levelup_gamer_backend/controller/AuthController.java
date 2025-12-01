@@ -11,7 +11,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-
 import java.util.Optional;
 
 @RestController
@@ -26,7 +25,6 @@ public class AuthController {
             AuthenticationManager authenticationManager) {
         this.usuarioService = usuarioService;
         this.authenticationManager = authenticationManager;
-        this.usuarioService.inicializarAdminYVendedor();
     }
 
     @PostMapping("/register")
@@ -56,16 +54,12 @@ public class AuthController {
                     new UsernamePasswordAuthenticationToken(
                             request.getEmail().toLowerCase(),
                             request.getPassword()));
-
             SecurityContextHolder.getContext().setAuthentication(authentication);
-
             Usuario usuario = usuarioService.obtenerPorEmail(request.getEmail().toLowerCase())
-                    .orElseThrow(
-                            () -> new RuntimeException("Error interno al buscar usuario después de la autenticación."));
+                    .orElseThrow(() -> new RuntimeException("Error interno"));
 
             String responseBody = String.format("{\"nombre\":\"%s %s\", \"rol\":\"%s\"}",
                     usuario.getNombre(), usuario.getApellido(), usuario.getRol());
-
             return ResponseEntity.ok(responseBody);
 
         } catch (Exception e) {
@@ -78,7 +72,6 @@ public class AuthController {
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No autenticado");
         }
-
         String email = authentication.getName();
         Optional<Usuario> optionalUsuario = usuarioService.obtenerPorEmail(email);
 
@@ -89,12 +82,6 @@ public class AuthController {
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado");
         }
-    }
-
-    @PostMapping("/logout")
-    public ResponseEntity<?> logout() {
-        SecurityContextHolder.clearContext();
-        return ResponseEntity.ok("Sesión cerrada correctamente");
     }
 
     @PutMapping("/perfil")
@@ -115,7 +102,12 @@ public class AuthController {
         }
 
         usuarioService.actualizarUsuario(usuario);
-
         return ResponseEntity.ok("Perfil actualizado correctamente.");
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout() {
+        SecurityContextHolder.clearContext();
+        return ResponseEntity.ok("Sesión cerrada correctamente");
     }
 }

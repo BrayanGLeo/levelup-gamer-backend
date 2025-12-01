@@ -4,7 +4,6 @@ import levelup_gamer_backend.entity.BlogPost;
 import levelup_gamer_backend.service.BlogPostService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
@@ -15,7 +14,6 @@ public class BlogPostController {
 
     public BlogPostController(BlogPostService blogPostService) {
         this.blogPostService = blogPostService;
-        this.blogPostService.inicializarDatosDemo();
     }
 
     @GetMapping

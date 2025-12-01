@@ -30,13 +30,10 @@ public class UsuarioServiceImpl implements UsuarioService {
         if (usuarioRepository.existsByRut(usuario.getRut())) {
             throw new RuntimeException("El RUT ya está registrado.");
         }
-
         usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
-
         if (usuario.getRol() == null || usuario.getRol().isEmpty()) {
             usuario.setRol("Cliente");
         }
-
         return usuarioRepository.save(usuario);
     }
 
@@ -52,7 +49,6 @@ public class UsuarioServiceImpl implements UsuarioService {
         } else {
             usuario.setPassword(existingUser.getPassword());
         }
-
         return usuarioRepository.save(usuario);
     }
 
@@ -78,33 +74,5 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Transactional
     public void eliminarPorId(Long id) {
         usuarioRepository.deleteById(id);
-    }
-
-    @Override
-    @Transactional
-    public void inicializarAdminYVendedor() {
-        if (usuarioRepository.findByEmail("admin@admin.cl").isEmpty()) {
-            Usuario admin = Usuario.builder()
-                    .nombre("Admin")
-                    .apellido("LevelUp")
-                    .rut("12345678-9")
-                    .email("admin@admin.cl")
-                    .password(passwordEncoder.encode("admin"))
-                    .rol("Administrador")
-                    .build();
-            usuarioRepository.save(admin);
-        }
-
-        if (usuarioRepository.findByEmail("vendedor@vendedor.cl").isEmpty()) {
-            Usuario vendedor = Usuario.builder()
-                    .nombre("Vendedor")
-                    .apellido("LevelUp")
-                    .rut("11111111-1")
-                    .email("vendedor@vendedor.cl")
-                    .password(passwordEncoder.encode("vendedor"))
-                    .rol("Vendedor")
-                    .build();
-            usuarioRepository.save(vendedor);
-        }
     }
 }
