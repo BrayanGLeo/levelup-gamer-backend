@@ -21,7 +21,6 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Service
-@SuppressWarnings("null")
 public class BoletaServiceImpl implements BoletaService {
 
     private final BoletaRepository boletaRepository;
@@ -42,11 +41,7 @@ public class BoletaServiceImpl implements BoletaService {
     @PostConstruct
     public void initOrderCounter() {
         Long maxOrder = boletaRepository.findMaxNumeroOrden();
-        if (maxOrder != null) {
-            orderCounter.set(maxOrder + 1);
-        } else {
-            orderCounter.set(1000L);
-        }
+        orderCounter.set(maxOrder != null ? maxOrder + 1 : 1000L);
     }
 
     @Override
@@ -67,8 +62,8 @@ public class BoletaServiceImpl implements BoletaService {
                 .apellidoCliente(request.getApellidoCliente())
                 .telefonoCliente(request.getTelefonoCliente())
                 .usuario(usuario)
-                .detalles(new ArrayList<>())
                 .direccionEnvio(request.getDireccionEnvio())
+                .detalles(new ArrayList<>())
                 .build();
 
         int totalCalculado = 0;
@@ -78,7 +73,7 @@ public class BoletaServiceImpl implements BoletaService {
                     itemDto.getCodigoProducto(),
                     itemDto.getCantidad());
 
-            int precioReal = producto.getPrecio(); 
+            int precioReal = producto.getPrecio();
 
             DetalleBoleta detalle = DetalleBoleta.builder()
                     .boleta(boleta)
@@ -92,9 +87,9 @@ public class BoletaServiceImpl implements BoletaService {
         }
 
         if (totalCalculado != request.getTotal()) {
-            throw new RuntimeException(
-                    "Error de integridad: El total calculado (" + totalCalculado + 
-                    ") no coincide con el total enviado (" + request.getTotal() + ").");
+            System.out.println("ADVERTENCIA: Total frontend (" + request.getTotal() +
+                    ") difiere de backend (" + totalCalculado + "). Se guardará el calculado.");
+            boleta.setTotal(totalCalculado);
         }
 
         return boletaRepository.save(boleta);
@@ -108,6 +103,12 @@ public class BoletaServiceImpl implements BoletaService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<Boleta> obtenerPorUsuario(String email) {
+        return boletaRepository.findByUsuarioEmailOrderByFechaCompraDesc(email);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public Optional<Boleta> obtenerPorId(Long id) {
         return boletaRepository.findById(id);
     }
@@ -117,11 +118,6 @@ public class BoletaServiceImpl implements BoletaService {
     public Boleta actualizarEstado(Long id, String nuevoEstado) {
         Boleta boleta = boletaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Boleta no encontrada."));
-
-        List<String> estadosValidos = List.of("Pendiente", "Procesando", "En preparación", "En tránsito", "Completado", "Cancelado");
-        if (!estadosValidos.contains(nuevoEstado)) {
-            throw new IllegalArgumentException("Estado de orden no válido.");
-        }
         boleta.setEstado(nuevoEstado);
         return boletaRepository.save(boleta);
     }
@@ -129,15 +125,8 @@ public class BoletaServiceImpl implements BoletaService {
     @Override
     @Transactional(readOnly = true)
     public Long obtenerTotalVentas() {
-        Long ventas = boletaRepository.findAll().stream()
-                .mapToLong(Boleta::getTotal)
+        return boletaRepository.findAll().stream()
+                .mapToLong(b -> b.getTotal() != null ? b.getTotal() : 0)
                 .sum();
-        return ventas != null ? ventas : 0L;
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<Boleta> obtenerPorUsuario(String email) {
-        return boletaRepository.findByUsuarioEmailOrderByFechaCompraDesc(email);
     }
 }

@@ -20,7 +20,7 @@ public class DetalleBoleta {
     @JoinColumn(name = "boleta_id", nullable = false)
     @JsonIgnore
     @ToString.Exclude
-    @EqualsAndHashCode.Exclude
+    @EqualsAndHashCode.Exclude 
     private Boleta boleta;
 
     @ManyToOne(fetch = FetchType.LAZY)
