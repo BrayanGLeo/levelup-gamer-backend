@@ -14,5 +14,7 @@ public class BoletaRequest {
     private String apellidoCliente;
     private String telefonoCliente;
 
+    private String direccionEnvio;
+
     private List<DetalleBoletaDto> items;
 }

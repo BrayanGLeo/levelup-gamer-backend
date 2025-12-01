@@ -1,5 +1,6 @@
 package levelup_gamer_backend.service.impl;
 
+import jakarta.annotation.PostConstruct;
 import levelup_gamer_backend.dto.BoletaRequest;
 import levelup_gamer_backend.dto.DetalleBoletaDto;
 import levelup_gamer_backend.entity.Boleta;
@@ -27,7 +28,7 @@ public class BoletaServiceImpl implements BoletaService {
     private final ProductoService productoService;
     private final UsuarioService usuarioService;
 
-    private static final AtomicLong ORDER_COUNTER = new AtomicLong(1000L);
+    private AtomicLong orderCounter = new AtomicLong(0);
 
     public BoletaServiceImpl(
             BoletaRepository boletaRepository,
@@ -36,6 +37,16 @@ public class BoletaServiceImpl implements BoletaService {
         this.boletaRepository = boletaRepository;
         this.productoService = productoService;
         this.usuarioService = usuarioService;
+    }
+
+    @PostConstruct
+    public void initOrderCounter() {
+        Long maxOrder = boletaRepository.findMaxNumeroOrden();
+        if (maxOrder != null) {
+            orderCounter.set(maxOrder + 1);
+        } else {
+            orderCounter.set(1000L);
+        }
     }
 
     @Override
@@ -47,12 +58,17 @@ public class BoletaServiceImpl implements BoletaService {
         }
 
         Boleta boleta = Boleta.builder()
-                .numeroOrden(ORDER_COUNTER.getAndIncrement())
+                .numeroOrden(orderCounter.getAndIncrement())
                 .fechaCompra(LocalDateTime.now())
                 .total(request.getTotal())
                 .estado(request.getEstado() != null ? request.getEstado() : "Pendiente")
+                .tipoEntrega(request.getTipoEntrega())
+                .nombreCliente(request.getNombreCliente())
+                .apellidoCliente(request.getApellidoCliente())
+                .telefonoCliente(request.getTelefonoCliente())
                 .usuario(usuario)
                 .detalles(new ArrayList<>())
+                .direccionEnvio(request.getDireccionEnvio())
                 .build();
 
         int totalCalculado = 0;

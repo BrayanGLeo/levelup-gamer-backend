@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -32,6 +31,21 @@ public class Boleta {
 
     @Column(name = "estado", length = 50, nullable = false)
     private String estado;
+
+    @Column(name = "tipo_entrega")
+    private String tipoEntrega;
+
+    @Column(name = "nombre_cliente")
+    private String nombreCliente;
+
+    @Column(name = "apellido_cliente")
+    private String apellidoCliente;
+
+    @Column(name = "telefono_cliente")
+    private String telefonoCliente;
+
+    @Column(name = "direccion_envio")
+    private String direccionEnvio;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = true)
