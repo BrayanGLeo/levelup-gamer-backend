@@ -28,6 +28,9 @@ public class BlogPost {
     @Column(length = 500)
     private String image;
 
+    @Column(columnDefinition = "TEXT")
+    private String summary;
+
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 }
