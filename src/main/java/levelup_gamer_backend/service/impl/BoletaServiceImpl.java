@@ -21,6 +21,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Service
+@SuppressWarnings("null")
 public class BoletaServiceImpl implements BoletaService {
 
     private final BoletaRepository boletaRepository;
@@ -29,13 +30,10 @@ public class BoletaServiceImpl implements BoletaService {
 
     private AtomicLong orderCounter = new AtomicLong(0);
 
-    public BoletaServiceImpl(
-            BoletaRepository boletaRepository,
-            ProductoService productoService,
-            UsuarioService usuarioService) {
-        this.boletaRepository = boletaRepository;
-        this.productoService = productoService;
-        this.usuarioService = usuarioService;
+    public BoletaServiceImpl(BoletaRepository repo, ProductoService prodService, UsuarioService userService) {
+        this.boletaRepository = repo;
+        this.productoService = prodService;
+        this.usuarioService = userService;
     }
 
     @PostConstruct
@@ -47,22 +45,30 @@ public class BoletaServiceImpl implements BoletaService {
     @Override
     @Transactional
     public Boleta crearBoleta(BoletaRequest request) {
+        System.out.println(">>> Iniciando creación de boleta para: " + request.getUsuarioEmail());
+
+        if (request.getItems() == null || request.getItems().isEmpty()) {
+            throw new RuntimeException("El carrito está vacío. No se puede procesar.");
+        }
+
         Usuario usuario = null;
         if (request.getUsuarioEmail() != null && !request.getUsuarioEmail().isEmpty()) {
-            usuario = usuarioService.obtenerPorEmail(request.getUsuarioEmail()).orElse(null);
+            usuario = usuarioService.obtenerPorEmail(request.getUsuarioEmail().trim().toLowerCase())
+                    .orElse(null);
         }
 
         Boleta boleta = Boleta.builder()
                 .numeroOrden(orderCounter.getAndIncrement())
                 .fechaCompra(LocalDateTime.now())
                 .total(request.getTotal())
-                .estado(request.getEstado() != null ? request.getEstado() : "Pendiente")
+                .estado("Pagado")
                 .tipoEntrega(request.getTipoEntrega())
+                .metodoPago(request.getMetodoPago())
                 .nombreCliente(request.getNombreCliente())
                 .apellidoCliente(request.getApellidoCliente())
                 .telefonoCliente(request.getTelefonoCliente())
-                .usuario(usuario)
                 .direccionEnvio(request.getDireccionEnvio())
+                .usuario(usuario)
                 .detalles(new ArrayList<>())
                 .build();
 
@@ -73,25 +79,21 @@ public class BoletaServiceImpl implements BoletaService {
                     itemDto.getCodigoProducto(),
                     itemDto.getCantidad());
 
-            int precioReal = producto.getPrecio();
-
             DetalleBoleta detalle = DetalleBoleta.builder()
                     .boleta(boleta)
                     .producto(producto)
                     .cantidad(itemDto.getCantidad())
-                    .precioUnitario(precioReal)
+                    .precioUnitario(producto.getPrecio())
                     .build();
 
             boleta.getDetalles().add(detalle);
-            totalCalculado += itemDto.getCantidad() * precioReal;
+            totalCalculado += itemDto.getCantidad() * producto.getPrecio();
         }
-
         if (totalCalculado != request.getTotal()) {
-            System.out.println("ADVERTENCIA: Total frontend (" + request.getTotal() +
-                    ") difiere de backend (" + totalCalculado + "). Se guardará el calculado.");
             boleta.setTotal(totalCalculado);
         }
 
+        System.out.println(">>> Guardando boleta #" + boleta.getNumeroOrden());
         return boletaRepository.save(boleta);
     }
 
@@ -116,8 +118,7 @@ public class BoletaServiceImpl implements BoletaService {
     @Override
     @Transactional
     public Boleta actualizarEstado(Long id, String nuevoEstado) {
-        Boleta boleta = boletaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Boleta no encontrada."));
+        Boleta boleta = boletaRepository.findById(id).orElseThrow(() -> new RuntimeException("No encontrada"));
         boleta.setEstado(nuevoEstado);
         return boletaRepository.save(boleta);
     }
@@ -125,8 +126,6 @@ public class BoletaServiceImpl implements BoletaService {
     @Override
     @Transactional(readOnly = true)
     public Long obtenerTotalVentas() {
-        return boletaRepository.findAll().stream()
-                .mapToLong(b -> b.getTotal() != null ? b.getTotal() : 0)
-                .sum();
+        return boletaRepository.findAll().stream().mapToLong(b -> b.getTotal() != null ? b.getTotal() : 0).sum();
     }
 }

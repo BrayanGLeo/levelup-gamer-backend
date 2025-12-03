@@ -57,6 +57,9 @@ public class ProductoController {
                     p.setStockCritico(producto.getStockCritico());
                     p.setImagenUrl(producto.getImagenUrl());
                     p.setCategoria(producto.getCategoria());
+                    p.setFeatures(producto.getFeatures());
+                    p.setSpecifications(producto.getSpecifications());
+
                     return ResponseEntity.ok(productoService.guardarProducto(p));
                 })
                 .orElse(ResponseEntity.notFound().build());

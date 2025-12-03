@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name = "PRODUCTO")
@@ -12,6 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class Producto {
 
     @Id
@@ -22,7 +24,7 @@ public class Producto {
     private String nombre;
 
     @Lob
-    @Column(name = "descripcion")
+    @Column(name = "descripcion", columnDefinition = "TEXT")
     private String descripcion;
 
     @Column(name = "precio", nullable = false)
@@ -36,6 +38,12 @@ public class Producto {
 
     @Column(name = "imagen_url", length = 500)
     private String imagenUrl;
+
+    @Column(name = "features", columnDefinition = "TEXT")
+    private String features;
+
+    @Column(name = "specifications", columnDefinition = "TEXT")
+    private String specifications;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "categoria_id", nullable = false)

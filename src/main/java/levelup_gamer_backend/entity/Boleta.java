@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
 import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name = "BOLETA")
@@ -11,6 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class Boleta {
 
     @Id
@@ -32,6 +34,9 @@ public class Boleta {
     @Column(name = "tipo_entrega")
     private String tipoEntrega;
 
+    @Column(name = "metodo_pago")
+    private String metodoPago;
+
     @Column(name = "nombre_cliente")
     private String nombreCliente;
 
@@ -41,7 +46,7 @@ public class Boleta {
     @Column(name = "telefono_cliente")
     private String telefonoCliente;
 
-    @Column(name = "direccion_envio")
+    @Column(name = "direccion_envio", length = 1000)
     private String direccionEnvio;
 
     @ManyToOne(fetch = FetchType.LAZY)

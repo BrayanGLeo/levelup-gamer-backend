@@ -1,6 +1,7 @@
 package levelup_gamer_backend.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -10,6 +11,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class DetalleBoleta {
 
     @Id
@@ -20,7 +22,7 @@ public class DetalleBoleta {
     @JoinColumn(name = "boleta_id", nullable = false)
     @JsonIgnore
     @ToString.Exclude
-    @EqualsAndHashCode.Exclude 
+    @EqualsAndHashCode.Exclude
     private Boleta boleta;
 
     @ManyToOne(fetch = FetchType.LAZY)

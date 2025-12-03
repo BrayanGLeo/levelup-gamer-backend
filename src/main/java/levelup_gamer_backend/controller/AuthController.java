@@ -4,8 +4,8 @@ import levelup_gamer_backend.dto.AuthRequest;
 import levelup_gamer_backend.dto.RegisterRequest;
 import levelup_gamer_backend.entity.Usuario;
 import levelup_gamer_backend.service.UsuarioService;
-import jakarta.servlet.http.HttpServletRequest; // IMPORTANTE
-import jakarta.servlet.http.HttpServletResponse; // IMPORTANTE
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -43,9 +43,10 @@ public class AuthController {
                     .rol("Cliente")
                     .build();
             usuarioService.registrarUsuario(nuevoUsuario);
-            return ResponseEntity.ok("Registro exitoso.");
+
+            return ResponseEntity.ok("{\"message\": \"Registro exitoso\"}");
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\"message\": \"" + e.getMessage() + "\"}");
         }
     }
 

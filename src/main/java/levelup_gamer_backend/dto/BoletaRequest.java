@@ -9,11 +9,10 @@ public class BoletaRequest {
     private Integer total;
     private String tipoEntrega;
     private String estado;
-
+    private String metodoPago;
     private String nombreCliente;
     private String apellidoCliente;
     private String telefonoCliente;
-
     private String direccionEnvio;
 
     private List<DetalleBoletaDto> items;
