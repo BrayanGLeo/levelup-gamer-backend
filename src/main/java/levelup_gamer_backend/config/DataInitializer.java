@@ -148,7 +148,7 @@ public class DataInitializer {
                                 crearProducto(productoRepository, "CG001", "PC Gamer ASUS ROG Strix",
                                                 "Un potente equipo diseñado para los gamers más exigentes. Equipado con procesadores de alto rendimiento y gráficos NVIDIA GeForce RTX.",
                                                 1299990, 3, 1,
-                                                "https://www.asus.com/media/Odin/Websites/global/Series/52.png",
+                                                "https://media.spdigital.cl/thumbnails/products/8u6wwtrx_be76f979_thumbnail_4096.jpg",
                                                 catConsolas,
                                                 "[\"Gráficos NVIDIA® GeForce RTX™ serie 5000.\", \"Procesador AMD Ryzen™ 7 septima generación.\", \"Sistema de refrigeración inteligente ROG.\", \"Iluminación Aura Sync personalizable.\"]",
                                                 "{\"Ejemplo (Modelo G15)\": {\"Procesador\": \"AMD Ryzen™ 7 7700X (8 núcleos/16 hilos)\", \"Gráficos\": \"NVIDIA® GeForce RTX™ 5070 12GB GDDR6\", \"Memoria\": \"16GB DDR4 SO-DIMM (Max 32GB)\", \"Almacenamiento\": \"512GB M.2 NVMe™ PCIe® 3.0 SSD\", \"Puertos\": \"1x USB 3.2 Gen 2 Tipo-C, 3x USB 3.2 Gen 1 Tipo-A, 1x HDMI 2.1\", \"Redes\": \"Wi-Fi 6 (802.11ax), Bluetooth® 5.1\", \"Sistema Operativo\": \"Windows 11 Home\"}}");
